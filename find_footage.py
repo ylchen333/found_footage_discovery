@@ -139,7 +139,9 @@ def ia_url(query, year_from, year_to, rows=ROWS_PER_QUERY, page=1):
 
 def ia_search(query, year_from, year_to, rows=ROWS_PER_QUERY, page=1):
     data = http_get_json(ia_url(query, year_from, year_to, rows, page))
-    return data.get("response", {}).get("docs", [])
+    if "response" not in data:   # e.g. {"error": "[BACKEND_ERROR] ..."}: a failure, not zero results
+        raise RuntimeError(f"archive.org error: {str(data.get('error', data))[:160]}")
+    return data["response"].get("docs", [])
 
 
 def flat(v):
